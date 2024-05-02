@@ -154,8 +154,9 @@ db.getCollection(db_name).aggregate([
     }
 ]);
 
-// 12. Write a MongoDB query to find the restaurants which do not prepare any cuisine of 'American' and achieved a score more than 70 and not located in the longitude less than -65.754168.
-//Note : Do this query without using $and operator.
+// 12. Write a MongoDB query to find the restaurants which do not prepare any cuisine of 'American' and 
+// achieved a score more than 70 and not located in the longitude less than -65.754168.
+// Note : Do this query without using $and operator.
 
 const target_latitude_2 = -65.754168
 const target_score = 70
@@ -279,7 +280,8 @@ db.getCollection(db_name).aggregate([
     }
 ]);
 
-// 18. Write a MongoDB query to find the restaurant Id, name, borough and cuisine for those restaurants which belong to the borough Staten Island or Queens or Bronxor Brooklyn.
+// 18. Write a MongoDB query to find the restaurant Id, name, borough and cuisine for those 
+// restaurants which belong to the borough Staten Island or Queens or Bronxor Brooklyn.
 
 db.getCollection(db_name).aggregate([
     {
@@ -297,7 +299,8 @@ db.getCollection(db_name).aggregate([
     }
 ]);
 
-// 19. Write a MongoDB query to find the restaurant Id, name, borough and cuisine for those restaurants which are not belonging to the borough Staten Island or Queens or Bronxor Brooklyn.
+// 19. Write a MongoDB query to find the restaurant Id, name, borough and cuisine for those restaurants 
+// which are not belonging to the borough Staten Island or Queens or Bronxor Brooklyn.
 
 db.getCollection(db_name).aggregate([
     {
@@ -334,7 +337,8 @@ db.getCollection(db_name).aggregate([
     }
 ]);
 
-// 21. Write a MongoDB query to find the restaurant Id, name, borough and cuisine for those restaurants which prepared dish except 'American' and 'Chinese' or restaurant's name begins with letter 'Wil'.
+// 21. Write a MongoDB query to find the restaurant Id, name, borough and cuisine for those restaurants 
+// which prepared dish except 'American' and 'Chinese' or restaurant's name begins with letter 'Wil'.
 
 db.getCollection(db_name).aggregate([
     {
@@ -353,7 +357,10 @@ db.getCollection(db_name).aggregate([
     }
 ]);
 
-// 22. Write a MongoDB query to find the restaurant Id, name, and grades for those restaurants which achieved a grade of "A" and scored 11 on an ISODate "2014-08-11T00:00:00Z" among many of survey dates..
+// 22. Write a MongoDB query to find the restaurant Id, name, and grades for those restaurants 
+// which achieved a grade of "A" and scored 11 on an ISODate "2014-08-11T00:00:00Z" among many of survey dates..
+
+const query_date = ISODate('2014-08-11T00:00:00Z') 
 
 db.getCollection(db_name).aggregate([
     {
@@ -371,27 +378,177 @@ db.getCollection(db_name).aggregate([
         $match : {
             'grades.grade' : 'A',
             'grades.score' : 11,
-            'grades.date' :  ISODate('2014-08-11T00:00:00Z') 
+            'grades.date' : query_date
         }
     }
 ]);
 
-// 23. Write a MongoDB query to find the restaurant Id, name and grades for those restaurants where the 2nd element of grades array contains a grade of "A" and score 9 on an ISODate "2014-08-11T00:00:00Z".
+// 23. Write a MongoDB query to find the restaurant Id, name and grades for those restaurants 
+//where the 2nd element of grades array contains a grade of "A" and score 9 on an ISODate "2014-08-11T00:00:00Z".
 
-// 24. Write a MongoDB query to find the restaurant Id, name, address and geographical location for those restaurants where 2nd element of coord array contains a value which is more than 42 and up to 52.. 
+const query_date = ISODate('2014-08-11T00:00:00Z') 
+
+db.getCollection(db_name).aggregate([
+    {
+        $project : {
+            _id : 1, 
+            name : 1, 
+            grades: {
+                $arrayElemAt: [ '$grades', 1]
+            }
+        }
+    },
+    {
+        $match : {
+            'grades.grade' : 'A',
+            'grades.score' : 9,
+            'grades.date' : query_date
+        }
+    }
+]);
+
+// 24. Write a MongoDB query to find the restaurant Id, name, address and geographical location for those restaurants 
+//where 2nd element of coord array contains a value which is more than 42 and up to 52.. 
+
+min_ = 42
+max_ = 52
+
+db.getCollection(db_name).aggregate([
+    {
+        $project : {
+            _id : 1,
+            name : 1,
+            address : 1,
+            address : { $arrayElemAt : [ '$address.coord', 1 ] } 
+        }
+    },
+    {
+        $match : {
+            'coord.1' : { $gt : min_,  $lt : max_}
+        }
+    }
+]);
 
 // 25. Write a MongoDB query to arrange the name of the restaurants in ascending order along with all the columns.
 
+db.getCollection(db_name).aggregate([
+    {
+        $sort : {
+            _id : 0,
+            name : 1
+        }
+    }
+]);
+
 // 26. Write a MongoDB query to arrange the name of the restaurants in descending along with all the columns.
 
-// 27. Write a MongoDB query to arranged the name of the cuisine in ascending order and for that same cuisine borough should be in descending order.
+db.getCollection(db_name).aggregate([
+    {
+        $sort : {
+            _id : 0,
+            name : -1
+        }
+    }
+]);
+
+// 27. Write a MongoDB query to arranged the name of the cuisine in ascending order
+// and for that same cuisine borough should be in descending order.
+
+db.getCollection(db_name).aggregate([
+    {
+        $project : {
+            _id : 0,
+            cuisine : 1, 
+            borough : 1,
+        }
+    },
+    {
+        $sort : {
+            cuisine : 1,
+            borough : -1
+        }
+    }
+]);
 
 // 28. Write a MongoDB query to know whether all the addresses contains the street or not.
 
+db.getCollection(db_name).aggregate([
+    {
+        $project : {
+            _id : 0, 
+            address : 1,
+        }
+    },
+    {
+        $match : {
+            'address.street' : { $exists : true }
+        }
+    }
+]);
+
 // 29. Write a MongoDB query which will select all documents in the restaurants collection where the coord field value is Double.
+
+db.getCollection(db_name).aggregate([
+    {
+        $match : {
+            'address.coord' : { $type : 'double' }
+        }
+    }
+]);
 
 // 30. Write a MongoDB query which will select the restaurant Id, name and grades for those restaurants which returns 0 as a remainder after dividing the score by 7.
 
-// 31. Write a MongoDB query to find the restaurant name, borough, longitude and attitude and cuisine for those restaurants which contains 'mon' as three letters somewhere in its name.
+db.getCollection(db_name).aggregate([
+    {
+        $project : {
+            _id : 1,
+            name : 1,
+            grades : 1
+        }
+    },
+    {
+        $match : {
+            $expr : { $eq : [ { $mod : ['$grades.score', 7] }, 0] }
+        }
+    }
+]);
 
-// 32. Write a MongoDB query to find the restaurant name, borough, longitude and latitude and cuisine for those restaurants which contain 'Mad' as first three letters of its name
+// 31. Write a MongoDB query to find the restaurant name, borough, longitude and attitude and cuisine 
+// for those restaurants which contains 'mon' as three letters somewhere in its name.
+
+db.getCollection(db_name).aggregate([
+    {
+        $project : {
+            _id : 0,
+            name : 1, 
+            borough : 1, 
+            cuisine : 1,
+            address : { coords : 1 } 
+        }
+    },
+    {
+        $match : {
+            name : { $regex : /mon/}
+        }
+    }
+]);
+
+// 32. Write a MongoDB query to find the restaurant name, borough, longitude and latitude and cuisine for those restaurants 
+// which contain 'Mad' as first three letters of its name
+
+db.getCollection(db_name).aggregate([
+    {
+        $project : {
+            _id : 0,
+            name : 1, 
+            borough : 1, 
+            cuisine : 1,
+            address : { coords : 1 } 
+        }
+    },
+    {
+        $match : {
+            name : { $regex : /Mad/}
+        }
+    }
+]);
